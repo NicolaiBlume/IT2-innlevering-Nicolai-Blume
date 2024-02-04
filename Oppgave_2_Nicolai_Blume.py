@@ -37,7 +37,7 @@ menneske_side_img = pg.transform.scale(menneske_side_img, (100, 600))
 sau_side_img = pg.image.load("sau_side.png")
 sau_side_img = pg.transform.scale(sau_side_img, (100, 600))
 
-# Lager en overflate vi kan tegne pa
+# Lager en overflate
 surface = pg.display.set_mode(SIZE)
 
 # Lager klokke
@@ -48,12 +48,11 @@ run = True
 
 
 # Klasser
-# ...
 
 class Spillbrett:
-    spokelser = []  # Liste av Spøkelse. List<Spøkelse>
-    hindringer = []  # Liste av Hindring. List<Hindring>
-    sauer = []  # Liste av Sau.
+    spokelser = []  
+    hindringer = []
+    sauer = []
 
     def leggTilSpillObjekt(self, spillobjekt):
         if isinstance(spillobjekt, Spokelse):
@@ -91,8 +90,8 @@ class Spillobjekt:
 
     def hentPosisjon(self):
         return (self.xPosisjon, self.yPosisjon)
-    
-
+""" 
+# Spøkelse klasse
 class Spokelse(Spillobjekt):
     def __init__(self):
         super().__init__(rd.randint(100, WIDTH - 140), rd.randint(0, HEIGHT - 40))
@@ -118,8 +117,8 @@ class Spokelse(Spillobjekt):
     def frys(self):
         self.vx = 0
         self.vy = 0
-
-
+"""
+# Menneske klasse
 class Menneske(Spillobjekt):
     
     def __init__(self, fart, poeng, holderSau):
@@ -132,7 +131,7 @@ class Menneske(Spillobjekt):
     def hentRektangel(self):
         return pg.Rect(self.xPosisjon, self.yPosisjon, 40, 40)
 
-    #Liten "sikkerhets rektangel foran det faktiske rektangelet. Forhindrer at kollisjon alltid er True, slik at man aldri kommer seg vekk fra hindringen."
+    #Hindrer at man setter seg fast i hindringer
     def hentNesteRektangel(self, dx, dy):
         return pg.Rect(self.xPosisjon + dx, self.yPosisjon + dy, 40, 40)
 
@@ -157,7 +156,34 @@ class Menneske(Spillobjekt):
             if not any(self.hentNesteRektangel(0,-5).colliderect(hindring.hentRektangel()) for hindring in hindringer):
                 self.yPosisjon -= self.vy
                 
+# Spøkelse klasse
+class Spokelse(Spillobjekt):
+    def __init__(self):
+        super().__init__(rd.randint(100, WIDTH - 140), rd.randint(0, HEIGHT - 40))
+        self.vx = 3
+        self.vy = 3
+
+    def tegnSpokelse(self):
+        surface.blit(spokelse_img,(self.xPosisjon, self.yPosisjon))
+
+    def endreRetning(self):
+        self.xPosisjon += self.vx
+        self.yPosisjon += self.vy
+
+        if self.xPosisjon <= 100 or self.xPosisjon > WIDTH - 140:
+            self.vx *= -1
+
+        if self.yPosisjon > HEIGHT - 40 or self.yPosisjon < 0:
+            self.vy *= -1
+
+    def hentRektangel(self):
+        return pg.Rect(self.xPosisjon, self.yPosisjon, 40, 40)
+
+    def frys(self):
+        self.vx = 0
+        self.vy = 0
                 
+# Hindring klasse
 class Hindring(Spillobjekt):
     def __init__(self):
         super().__init__(rd.randint(100, WIDTH - 180), rd.randint(0, HEIGHT - 80))
@@ -170,7 +196,7 @@ class Hindring(Spillobjekt):
     def hentRektangel(self):
         return pg.Rect(self.xPosisjon, self.yPosisjon, self.bredde, self.hoyde)
         
-
+# Saue klasse
 class Sau(Spillobjekt):
     def __init__(self):
         super().__init__(rd.randint(WIDTH - 100, WIDTH - 40), rd.randint(0, HEIGHT - 40))
